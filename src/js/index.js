@@ -30,13 +30,14 @@ const prepareThumbnailsClips = (videoTime, options) => {
   let thumbnailOffset = 0;
   const stepTime = options.stepTime;
   const thumbnailWidth = options.width;
-  const spriteURL = options.spriteUrl;
+  const thumbsPerImage = options.perImage;
+  const initialSpriteUrl = options.spriteUrl.replace('%d', 1);
   const thumbnailClips = {
     0: {
-      src: spriteURL,
+      src: initialSpriteUrl,
       style: {
         left: (thumbnailWidth / 2 * -1) + 'px',
-        width: ((Math.floor(videoTime / stepTime) + 1) * thumbnailWidth) + 'px',
+        width: (thumbsPerImage * thumbnailWidth) + 'px',
         clip: 'rect(0,' + options.width + 'px,' + options.width + 'px, 0)'
       }
     }
@@ -44,8 +45,12 @@ const prepareThumbnailsClips = (videoTime, options) => {
 
   while (currentTime <= videoTime) {
     currentTime += stepTime;
-    thumbnailOffset = ++currentIteration * thumbnailWidth;
+    thumbnailOffset = (++currentIteration % thumbsPerImage) * thumbnailWidth;
+    const spriteNum = Math.floor(currentTime / (stepTime * thumbsPerImage)) + 1;
+    const spriteURL = options.spriteUrl.replace('%d', spriteNum);
+
     thumbnailClips[currentTime] = {
+      src: spriteURL,
       style: {
         left: ((thumbnailWidth / 2 + thumbnailOffset) * -1) + 'px',
         clip: 'rect(0, ' + (thumbnailWidth + thumbnailOffset) + 'px,' +
@@ -56,23 +61,23 @@ const prepareThumbnailsClips = (videoTime, options) => {
   return thumbnailClips;
 };
 
-const initializeThumbnails = (thumbnailsClips, player) => {
-
+const initializeThumbnails = (player, options) => {
+  const thumbnailsClips = prepareThumbnailsClips(player.duration(), options);
   const thumbnailClips = ThumbnailHelpers.createThumbnails({}, defaults, thumbnailsClips);
   const progressControl = player.controlBar.progressControl;
   const thumbnailImg = ThumbnailHelpers.createThumbnailImg(thumbnailClips);
   const timelineTime = ThumbnailHelpers.createThumbnailTime();
   const thumbnailArrowDown = ThumbnailHelpers.createThumbnailArrowDown();
-  let thumbnaislHolder = ThumbnailHelpers.createThumbnaislHolder();
+  let thumbnailsHolder = ThumbnailHelpers.createThumbnaislHolder();
 
-  thumbnaislHolder = ThumbnailHelpers.mergeThumbnailElements(thumbnaislHolder,
+  thumbnailsHolder = ThumbnailHelpers.mergeThumbnailElements(thumbnailsHolder,
                                                              thumbnailImg,
                                                              timelineTime,
                                                              thumbnailArrowDown);
   ThumbnailHelpers.hidePlayerOnHoverTime(progressControl);
 
   if (window.navigator.userAgent.toLowerCase().indexOf('android') !== -1) {
-    ThumbnailHelpers.suportAndroidEvents();
+    ThumbnailHelpers.supportAndroidEvents();
   }
 
   ThumbnailHelpers.createThumbnails(thumbnailImg.style,
@@ -81,25 +86,26 @@ const initializeThumbnails = (thumbnailsClips, player) => {
   ThumbnailHelpers.centerThumbnailOverCursor(thumbnailImg);
 
   ThumbnailHelpers.addThumbnailToPlayer(progressControl,
-                                        thumbnaislHolder);
+                                        thumbnailsHolder);
 
-  ThumbnailHelpers.upadateOnHover(progressControl,
-                                  thumbnaislHolder,
+  ThumbnailHelpers.updateOnHover(progressControl,
+                                  thumbnailsHolder,
                                   thumbnailClips,
                                   timelineTime,
                                   thumbnailImg,
                                   player);
 
-  ThumbnailHelpers.upadateOnHoverOut(progressControl,
-                                     thumbnaislHolder,
+  ThumbnailHelpers.updateOnHoverOut(progressControl,
+                                     thumbnailsHolder,
                                      player);
 };
 
 const onPlayerReady = (player, options) => {
+  if (player.duration()) {
+    initializeThumbnails(player, options);
+  }
   player.on('loadedmetadata', (() => {
-    const thumbnailsClips = prepareThumbnailsClips(player.duration(), options);
-
-    initializeThumbnails(thumbnailsClips, player);
+    initializeThumbnails(player, options);
   }));
 };
 /**

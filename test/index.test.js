@@ -95,9 +95,9 @@ QUnit.test('registers itself with video.js', function(assert) {
   );
 
   assert.equal(
-    'rect(0px 100px 100px 0px)',
+    'rect(0px, 100px, 100px, 0px)',
     this.image.style.clip,
-    'The plugin adds thumbnail image with neccessery styles'
+    'The plugin adds thumbnail image with necessary styles'
   );
 
   assert.equal(

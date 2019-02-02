@@ -2,7 +2,6 @@
   position: absolute;
   left: -1000px;
   bottom: 11px;
-  height: 86px;
 }
 
 /* the thumbnail image itself */
@@ -13,7 +12,6 @@
   bottom: 16px;
   opacity: 0;
   transition: opacity 0.2s ease;
-  height: 86px;
   padding: 5px 0 23px 0;
   background: rgba(255,255,255,0.7);
 }

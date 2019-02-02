@@ -8,8 +8,7 @@
 </head>
 <body>
   <video id="videojs-thumbnails-player" class="video-js vjs-default-skin" controls>
-    <source src="//vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
-    <source src="//vjs.zencdn.net/v/oceans.webm" type="video/webm">
+    <source src="https://www.sample-videos.com/video123/mp4/480/big_buck_bunny_480p_30mb.mp4" type="video/mp4">
   </video>
   <ul>
     <li><a href="test/">Run unit tests in browser.</a></li>
@@ -23,8 +22,9 @@
       player.thumbnails(
           {
               width: 100,
-              spriteUrl: 'http://placehold.it/350x150',
-              stepTime: 2,
+              spriteUrl: '/sprite_test_%d.jpg',
+              stepTime: 5,
+              perImage: 10,
           }
       );
 

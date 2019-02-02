@@ -68,7 +68,7 @@ export default class ThumbnailHelpers {
     };
   }
 
-  static suportAndroidEvents(player) {
+  static supportAndroidEvents(player) {
     // Android doesn't support :active and :hover on non-anchor and non-button elements
     // so, we need to fake the :active selector for thumbnails to show up.
     const progressControl = player.controlBar.progressControl;
@@ -169,8 +169,7 @@ export default class ThumbnailHelpers {
   }
 
   static updateThumbnailTime(timelineTime, progressControl) {
-    timelineTime.innerHTML = (progressControl.seekBar.mouseTimeDisplay.
-                             el_.attributes['data-current-time'].value);
+    timelineTime.innerHTML = (progressControl.seekBar.mouseTimeDisplay.el_.innerText);
   }
 
   static getPageMousePositionX(event) {
@@ -237,16 +236,13 @@ export default class ThumbnailHelpers {
                       thumbnailsHolder,
                       thumbnailClips,
                       timelineTime,
-                      thumbnailImg,
-                      player) {
-
-    const duration = ThumbnailHelpers.getVideoDuration(player);
+                      thumbnailImg) {
     const pageXOffset = ThumbnailHelpers.getScrollOffset().x;
-    const progresBarPosition = progressControl.el().
+    const progressBarPosition = progressControl.el().
                                getBoundingClientRect();
 
-    const progresBarRightOffset = (progresBarPosition.width ||
-                                   progresBarPosition.right) +
+    const progressBarRightOffset = (progressBarPosition.width ||
+                                   progressBarPosition.right) +
                                    pageXOffset;
 
     const pageMousePositionX = ThumbnailHelpers.getPageMousePositionX(event);
@@ -256,9 +252,7 @@ export default class ThumbnailHelpers {
                                                                pageXOffset,
                                                                event);
 
-    const mouseTime = ThumbnailHelpers.getMouseVideoTime(mouseLeftOffset,
-                                                         progressControl,
-                                                         duration);
+    const mouseTime = ThumbnailHelpers.parseDisplayTime(timelineTime.innerText);
 
     const activeThumbnail = ThumbnailHelpers.getActiveThumbnail(thumbnailClips,
                                                                 mouseTime);
@@ -273,17 +267,17 @@ export default class ThumbnailHelpers {
                                                 activeThumbnail,
                                                 thumbnailClips,
                                                 mouseLeftOffset,
-                                                progresBarRightOffset);
+                                                progressBarRightOffset);
 
     ThumbnailHelpers.updateThumbnailLeftStyle(mouseLeftOffset, thumbnailsHolder);
   }
 
-  static upadateOnHover(progressControl,
-                          thumbnailsHolder,
-                          thumbnailClips,
-                          timelineTime,
-                          thumbnailImg,
-                          player) {
+  static updateOnHover(progressControl,
+                       thumbnailsHolder,
+                       thumbnailClips,
+                       timelineTime,
+                       thumbnailImg,
+                       player) {
 
     // update the thumbnail while hovering
     progressControl.on('mousemove', (event) => {
@@ -309,7 +303,7 @@ export default class ThumbnailHelpers {
     thumbnailsHolder.style.left = '-1000px';
   }
 
-  static upadateOnHoverOut(progressControl, thumbnailsHolder, player) {
+  static updateOnHoverOut(progressControl, thumbnailsHolder, player) {
 
     // move the placeholder out of the way when not hovering
     progressControl.on('mouseout', (event) => {
@@ -324,5 +318,23 @@ export default class ThumbnailHelpers {
     player.on('userinactive', (event) => {
       ThumbnailHelpers.hideThumbnail(thumbnailsHolder);
     });
+  }
+
+  static parseDisplayTime(time) {
+    const parts = time.split(':');
+    let seconds = 0;
+    let factor = 1;
+
+    while (true) {
+      if (parts.length === 0) {
+        break;
+      }
+
+      const part = parts.pop();
+
+      seconds += part * factor;
+      factor *= 60;
+    }
+    return seconds;
   }
 }
